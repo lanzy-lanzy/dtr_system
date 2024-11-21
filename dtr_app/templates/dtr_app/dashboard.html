@@ -1,0 +1,72 @@
+{% extends 'dtr_app/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg mb-6 transform hover:-translate-y-1 transition-transform duration-200">
+        <div class="p-8 text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Daily Time Record</h2>
+            <div class="text-4xl font-bold text-primary mb-8" id="current-time"></div>
+            <div class="max-w-md mx-auto">
+                {% if not current_record or not current_record.time_in %}
+                <form action="{% url 'time_in' %}" method="post" class="mb-4">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Time In
+                    </button>
+                </form>
+                {% endif %}
+                
+                {% if current_record and current_record.time_in and not current_record.time_out %}
+                <form action="{% url 'time_out' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Time Out
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg">
+        <div class="p-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-6">Recent Records</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time In</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Out</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for record in recent_records %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ record.date|date:"M d, Y" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ record.time_in|time:"h:i A"|default:"-" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ record.time_out|time:"h:i A"|default:"-" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if record.status == 'present' %}bg-green-100 text-green-800
+                                    {% elif record.status == 'late' %}bg-red-100 text-red-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ record.status|title }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">No records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
